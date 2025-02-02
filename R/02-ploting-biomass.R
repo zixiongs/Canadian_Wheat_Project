@@ -27,11 +27,12 @@ biomass_2022 |>
   theme_classic() +
   #facet_wrap(~genotype) +
   scale_fill_manual(values = c("white", "gray")) +
-  labs(y="Total above ground biomass (g)", size = 5) +
-  scale_y_continuous(breaks=seq(5,40,5), limits = c(0,45),expand=c(0,0), sec.axis = dup_axis(name = NULL, labels = NULL)) +
+  labs(y="Total above ground biomass (g)", 
+       x="Treatment temperature (°C)") +
+  scale_y_continuous(breaks=seq(5,35,5), limits = c(0,40),expand=c(0,0), sec.axis = dup_axis(name = NULL, labels = NULL)) +
   theme(axis.title.y = element_text(size=12), 
         axis.text.y = element_text(size =12, margin=margin(3,3,3,3,"pt"), colour=c("black", "black", "black", "black")),
-        axis.title.x = element_blank(), 
+        axis.title.x = element_text(size=12), 
         axis.text.x = element_text(size = 12, margin=margin(3,3,3,3,"pt"), colour=c("black", "black", "black", "black", "black", "black"))) +
   theme(plot.background = element_rect(fill = "white"),
         plot.margin = unit(c(0.1, 0.3, 0.1, 0.1), "cm"), 
@@ -41,8 +42,8 @@ biomass_2022 |>
         axis.ticks.length.y.right = unit(0, "cm"),
         axis.ticks.length.x.bottom = unit(0.25, "cm"),  # Add ticks at the bottom x-axis
         axis.ticks.length.y.left = unit(0.25, "cm")) +
-  annotate("text", x= 0.7, y=42, label="(a)",size = 5) +
-  annotate("text", x= 1.2, y=37, label=sig_labs, size = 4.2, hjust = 0) +
+  annotate("text", x= 0.7, y=37, label="(a)",size = 5) +
+  annotate("text", x= 1.2, y=34.5, label=sig_labs, size = 4.1, hjust = 0) +
   theme(legend.position = c(0.8, 0.85),
         legend.text = element_text(size = 12),
         legend.title = element_blank(),
@@ -76,10 +77,11 @@ create_biomass_plot <- function(data, genotype_name, plot_label = "(a)") {
     geom_point(position = position_dodge(width = 0.24)) +
     theme_classic() +
     scale_fill_manual(values = c("white", "gray")) +
-    labs(y = "Total above ground biomass (g)", size = 5) +
+    labs(y = "Total above ground biomass (g)",
+         x="Treatment temperature (°C)") +
     scale_y_continuous(
-      breaks = seq(5, 40, 5), 
-      limits = c(0, 45),
+      breaks = seq(5, 35, 5), 
+      limits = c(0, 40),
       expand = c(0, 0), 
       sec.axis = dup_axis(name = NULL, labels = NULL)
     ) +
@@ -107,8 +109,8 @@ create_biomass_plot <- function(data, genotype_name, plot_label = "(a)") {
       axis.ticks.length.x.bottom = unit(0.25, "cm"),
       axis.ticks.length.y.left = unit(0.25, "cm")
     ) +
-    annotate("text", x= 0.7, y=42, label="(a)",size = 5) +
-    annotate("text", x= 1.2, y=37, label=sig_labs, size = 4.2, hjust = 0) +
+    annotate("text", x= 0.7, y=37, label=plot_label,size = 5) +
+    annotate("text", x= 1.2, y=33.8, label=sig_labs, size = 3.9, hjust = 0) +
     theme(
       legend.position = c(0.8, 0.85),
       legend.text = element_text(size = 12),
@@ -130,14 +132,9 @@ create_biomass_plot <- function(data, genotype_name, plot_label = "(a)") {
     )
 }
 
-create_biomass_plot(biomass_2022, "A1614-KE07", "(a)")
-
-distinct(biomass_2022,genotype)
-
-
 # Writing for-loop --------------------------------------------------------
 
-genotypes <- distinct(biomass_2022, genotype)
+genotypes <- distinct(biomass_2022, genotype) |> arrange(genotype)
 labels <- letters[1:nrow(genotypes)]
 plot_list <- list()
 
@@ -156,6 +153,7 @@ for(i in 1:nrow(genotypes)) {
 
 # Don't show y-axis title except for the left most plot
 show_y_labels <- rep(c(TRUE, FALSE, FALSE, FALSE), 5)
+
 plot_list_modified <- map2(plot_list, show_y_labels, function(p, show) {
   if (!show) {
     p + theme(axis.title.y = element_blank(),
@@ -168,6 +166,6 @@ plot_list_modified <- map2(plot_list, show_y_labels, function(p, show) {
 
 
 p1 <- patchwork::wrap_plots(plot_list_modified, nrow = 5, ncol = 4)
-pdf("outputs/plots/p1.pdf", width = 16, height = 16)
+pdf("outputs/plots/biomass-2022.pdf", width = 16, height = 16)
 print(p1)
 dev.off()
